@@ -1,0 +1,28 @@
+services:
+  # Service 1: The Ollama LLM Server
+  ollama-service:
+    image: ollama/ollama
+    container_name: ollama-service
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  # Service 2: Our Spring Boot RAG Application
+  rag-app:
+    container_name: rag-app
+    # UPDATE HERE: Explicitly pointing to the Dockerfile
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - ollama-service
+    environment:
+      - SPRING_AI_OLLAMA_BASE_URL=http://ollama-service:11434
+    restart: on-failure
+
+volumes:
+  ollama_data:
