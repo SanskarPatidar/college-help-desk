@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>College AI Assistant</title>
+
+    <style>
+        body{
+            font-family: Arial;
+            background:#0f172a;
+            color:white;
+            display:flex;
+            justify-content:center;
+            margin-top:40px;
+        }
+
+        .box{
+            width:750px;
+        }
+
+        textarea{
+            width:100%;
+            height:90px;
+            padding:10px;
+            font-size:16px;
+            border-radius:8px;
+            border:none;
+        }
+
+        button{
+            margin-top:12px;
+            padding:10px 20px;
+            font-size:16px;
+            border:none;
+            border-radius:8px;
+            background:#22c55e;
+            color:white;
+            cursor:pointer;
+        }
+
+        .response{
+            margin-top:20px;
+            padding:15px;
+            background:#1e293b;
+            border-radius:8px;
+            min-height:120px;
+            white-space:pre-wrap;
+        }
+
+        .session{
+            margin-bottom:10px;
+            background:#1e293b;
+            padding:12px;
+            border-radius:8px;
+            font-size:14px;
+        }
+
+        .note{
+            font-size:13px;
+            color:#cbd5e1;
+            margin-top:6px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="box">
+
+    <h2>College AI Assistant</h2>
+
+    <div class="session">
+        <b>Your Session ID:</b>
+        <span id="sessionId"></span>
+        <button onclick="newSession()" style="margin-left:10px;background:#ef4444;">New Session</button>
+
+        <div class="note">
+            If you want conversation memory to be saved,<br>
+            copy and reuse this session ID later.<br>
+            If you refresh or create new session, memory resets.
+        </div>
+    </div>
+
+    <textarea id="query" placeholder="Ask about faculty, notices, syllabus..."></textarea>
+    <br>
+    <button onclick="ask()">Ask</button>
+
+    <div class="response" id="response">Answer will appear here...</div>
+
+</div>
+
+<script>
+
+    let sessionId = localStorage.getItem("sessionId");
+
+    if(!sessionId){
+        sessionId = crypto.randomUUID();
+        localStorage.setItem("sessionId", sessionId);
+    }
+
+    document.getElementById("sessionId").innerText = sessionId;
+
+    function newSession(){
+        sessionId = crypto.randomUUID();
+        localStorage.setItem("sessionId", sessionId);
+        document.getElementById("sessionId").innerText = sessionId;
+    }
+
+    async function ask(){
+
+        let query = document.getElementById("query").value.trim();
+        if(!query) return;
+
+        document.getElementById("response").innerText = "Thinking...";
+
+        try{
+            let res = await fetch("/ask/" + sessionId, {
+                method:"POST",
+                headers:{
+                    "Content-Type":"text/plain"
+                },
+                body: query
+            });
+
+            let data = await res.text();
+            document.getElementById("response").innerText = data;
+
+        }catch(e){
+            document.getElementById("response").innerText = "Server error";
+        }
+    }
+
+</script>
+</body>
+</html>

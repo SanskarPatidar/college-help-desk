@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: college-help-desk\
+  threads:
+    virtual:
+      enabled: true # For better scalability of one thread per request model
+  ai:
+    retry:
+      max-attempts: 10
+    openai:
+      api-key:
+      chat:
+        options:
+          temperature: 0.2
+          model: llama-3.3-70b-versatile # switch from default model to what we want
+      base-url: https://api.groq.com/openai
+elasticsearch:
+  host: ${DOCKER_ELASTICSEARCH_HOST:localhost}
+  port: 9200
+embedding:
+  dimension: 1024
+
+ollama:
+  host: ${DOCKER_OLLAMA_HOST:localhost}
+  port: 11434
+
+# check ConversationMemoryService
+conversation:
+  memory:
+    max-size: 10
+
+# check QueryCacheService
+cache:
+  similarity_threshold: 0.95
+
+# check VectorSearchService
+vector_search:
+  top_k: 2
+
+
+

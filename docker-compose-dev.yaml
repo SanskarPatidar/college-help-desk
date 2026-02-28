@@ -44,16 +44,20 @@ services:
     depends_on:
       - elasticsearch
 
-
   college-help-desk:
-    image: ${DOCKER_USERNAME}/rag-service:latest
-    container_name: rag-service
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: ${DOCKER_USERNAME}/college-help-desk:latest
+    container_name: college-help-desk
     ports:
       - "8080:8080"
     depends_on:
       ollama:
         condition: service_started
       elasticsearch:
+        condition: service_started
+      elasticvue:
         condition: service_started
     networks:
       - ollama-docker
