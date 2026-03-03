@@ -44,6 +44,15 @@ services:
     depends_on:
       - elasticsearch
 
+  redis-stack:
+    container_name: redis-stack
+    image: redis/redis-stack:latest
+    ports:
+      - "6379:6379" # Redis
+      - "8001:8001" # RedisInsight UI
+    volumes:
+      - redis_stack_data:/data
+
   college-help-desk:
     build:
       context: .
@@ -69,3 +78,6 @@ services:
 networks:
   ollama-docker:
     external: false
+
+volumes:
+  redis_stack_data:

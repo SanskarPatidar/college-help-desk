@@ -1,14 +1,11 @@
 package com.sanskar.CollegeHelpDesk;
 
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -30,8 +27,4 @@ public class CollegeHelpDeskApplication {
         return Executors.newVirtualThreadPerTaskExecutor();
     }
 
-    @Bean
-    public ChatClient chatClient(ChatClient.Builder builder) {
-        return builder.build();
-    }
 }

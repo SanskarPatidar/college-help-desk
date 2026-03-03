@@ -1,10 +1,11 @@
 package com.sanskar.CollegeHelpDesk.service.ingestion;
 
 import com.sanskar.CollegeHelpDesk.model.Resource;
-import com.sanskar.CollegeHelpDesk.model.ResourceChunk;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.document.Document;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
@@ -12,7 +13,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public abstract class AbstractIngestionTemplate {
     private final ResourceSplitter resourceSplitter;
-    private final EmbeddingService embeddingService;
     private final VectorStoreService vectorStoreService;
 
     public final void ingest(String url) {
@@ -23,22 +23,18 @@ public abstract class AbstractIngestionTemplate {
             return;
         }
         List<String> texts = transform(resources);
-        List<ResourceChunk> chunks = split(resources, texts);
-        embed(chunks);
-        store(chunks);
+        List<Document> docs = split(resources, texts);
+        store(docs);
         log.info("Ingestion completed");
     }
 
     protected abstract List<Resource> load(String url);
     protected abstract List<String> transform(List<Resource> resources);
-    protected List<ResourceChunk> split(List<Resource> resources, List<String> texts) {
+    protected List<Document> split(List<Resource> resources, List<String> texts) {
         return resourceSplitter.split(resources, texts);
     };
-    protected void embed(List<ResourceChunk> chunks) {
-        embeddingService.embedAll(chunks);
-    };
-    protected void store(List<ResourceChunk> chunks) {
-        vectorStoreService.storeAll(chunks);
+    protected void store(List<Document> docs) {
+        vectorStoreService.storeAll(docs);
     };
 }
 

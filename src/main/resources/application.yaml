@@ -5,24 +5,30 @@ spring:
     virtual:
       enabled: true # For better scalability of one thread per request model
   ai:
-    retry:
-      max-attempts: 10
     openai:
-      api-key:
+      api-key: ${OPENAI_API_KEY}
       chat:
         options:
-          temperature: 0.2
-          model: llama-3.3-70b-versatile # switch from default model to what we want
-      base-url: https://api.groq.com/openai
+          model: gpt-4.1-mini
+    retry:
+      max-attempts: 10
+
+  #    ollama:
+#      base-url: http://localhost:11434
+#      chat:
+#        model: deepseek-r1:1.5b
+#      embedding:
+#        model: nomic-embed-text # dimension depends on model to model
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.vectorstore.elasticsearch.autoconfigure.ElasticsearchVectorStoreAutoConfiguration
+
 elasticsearch:
   host: ${DOCKER_ELASTICSEARCH_HOST:localhost}
   port: 9200
-embedding:
-  dimension: 1024
 
-ollama:
-  host: ${DOCKER_OLLAMA_HOST:localhost}
-  port: 11434
+embedding:
+  dimensions: 768 # supported by nomic-embed-text, adjust if using a different model for VectorStore
 
 # check ConversationMemoryService
 conversation:
@@ -30,12 +36,21 @@ conversation:
     max-size: 10
 
 # check QueryCacheService
-cache:
-  similarity_threshold: 0.95
+vector-cache:
+  similarity_threshold: 0.95 # check query similarity to query in vector cache
 
 # check VectorSearchService
-vector_search:
-  top_k: 2
+vector-database:
+  top-k: 2
+  similarity-threshold: 0.6 # check query similarity to content in vector database
+
+redis:
+  host: localhost
+  port: 6379
+
+chat-history:
+  max-messages: 5
+
 
 
 

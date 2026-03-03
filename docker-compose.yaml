@@ -44,6 +44,12 @@ services:
     depends_on:
       - elasticsearch
 
+  redis-stack:
+    container_name: redis-stack
+    image: redis/redis-stack:latest
+    ports:
+      - 6379:6379
+
 
   college-help-desk:
     image: ${DOCKER_USERNAME}/rag-service:latest

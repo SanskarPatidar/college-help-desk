@@ -2,7 +2,6 @@ package com.sanskar.CollegeHelpDesk.service.notice;
 
 import com.sanskar.CollegeHelpDesk.model.Resource;
 import com.sanskar.CollegeHelpDesk.service.ingestion.AbstractIngestionTemplate;
-import com.sanskar.CollegeHelpDesk.service.ingestion.EmbeddingService;
 import com.sanskar.CollegeHelpDesk.service.ingestion.ResourceSplitter;
 import com.sanskar.CollegeHelpDesk.service.ingestion.VectorStoreService;
 import org.springframework.stereotype.Service;
@@ -18,10 +17,9 @@ public class NoticeIngestionService extends AbstractIngestionTemplate {
             NoticeResourceLoader noticeResourceLoader,
             NoticeResourceTransformer noticeResourceTransformer,
             ResourceSplitter resourceSplitter,
-            EmbeddingService embeddingService,
             VectorStoreService vectorStoreService
     ) {
-        super(resourceSplitter, embeddingService, vectorStoreService);
+        super(resourceSplitter, vectorStoreService);
         this.noticeResourceLoader = noticeResourceLoader;
         this.noticeResourceTransformer = noticeResourceTransformer;
     }

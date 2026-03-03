@@ -1,12 +1,9 @@
 package com.sanskar.CollegeHelpDesk.service.faculty;
 
 import com.sanskar.CollegeHelpDesk.model.Resource;
-import com.sanskar.CollegeHelpDesk.model.ResourceChunk;
 import com.sanskar.CollegeHelpDesk.service.ingestion.AbstractIngestionTemplate;
-import com.sanskar.CollegeHelpDesk.service.ingestion.EmbeddingService;
 import com.sanskar.CollegeHelpDesk.service.ingestion.ResourceSplitter;
 import com.sanskar.CollegeHelpDesk.service.ingestion.VectorStoreService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,10 +17,9 @@ public class FacultyIngestionService extends AbstractIngestionTemplate {
             FacultyResourceLoader facultyResourceLoader,
             FacultyResourceTransformer facultyResourceTransformer,
             ResourceSplitter resourceSplitter,
-            EmbeddingService embeddingService,
             VectorStoreService vectorStoreService
     ) {
-        super(resourceSplitter, embeddingService, vectorStoreService);
+        super(resourceSplitter, vectorStoreService);
         this.facultyResourceLoader = facultyResourceLoader;
         this.facultyResourceTransformer = facultyResourceTransformer;
     }
