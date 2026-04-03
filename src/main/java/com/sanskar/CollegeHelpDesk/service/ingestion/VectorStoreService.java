@@ -29,8 +29,8 @@ public class VectorStoreService {
     private String resolveIndex(ResourceType type) {
         return switch (type) {
             case ResourceType.FACULTY -> "faculty-index";
-            case ResourceType.NOTICE -> "syllabus-index";
-            default -> "notice-index";
+            case ResourceType.NOTICE -> "notice-index";
+            default -> "syllabus-index";
         };
     }
 }

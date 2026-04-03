@@ -26,9 +26,9 @@ public class VectorStoreConfiguration {
     }
 
     @Bean("notice-index")
-    public VectorStore vectorStore(RestClient restClient,
-                                   EmbeddingModel embeddingModel,
-                                   @Value("${embedding.dimensions}") int dimensions
+    public VectorStore noticeIndexVectorStore(RestClient restClient,
+                                              EmbeddingModel embeddingModel,
+                                              @Value("${embedding.dimensions}") int dimensions
     ) {
         ElasticsearchVectorStoreOptions vectorStoreOptions = new ElasticsearchVectorStoreOptions();
         vectorStoreOptions.setDimensions(dimensions);
@@ -41,9 +41,9 @@ public class VectorStoreConfiguration {
     }
 
     @Bean("faculty-index")
-    public VectorStore vectorStore2(RestClient restClient,
-                                   EmbeddingModel embeddingModel,
-                                   @Value("${embedding.dimensions}") int dimensions
+    public VectorStore facultyIndexVectorStore(RestClient restClient,
+                                               EmbeddingModel embeddingModel,
+                                               @Value("${embedding.dimensions}") int dimensions
     ) {
         ElasticsearchVectorStoreOptions vectorStoreOptions = new ElasticsearchVectorStoreOptions();
         vectorStoreOptions.setDimensions(dimensions);

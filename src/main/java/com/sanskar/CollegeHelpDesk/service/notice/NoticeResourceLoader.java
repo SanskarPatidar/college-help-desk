@@ -5,12 +5,16 @@ import com.sanskar.CollegeHelpDesk.model.Resource;
 import com.sanskar.CollegeHelpDesk.model.ResourceType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Component
@@ -18,11 +22,16 @@ import java.util.UUID;
 @Slf4j
 public class NoticeResourceLoader {
     private final RestTemplate restTemplate;
-    private LocalDate lastLoadedDate = LocalDate.MIN;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
     public List<Resource> load(String url) {
         // "https://iiitbhopal.ac.in/api/CMSData/GetNoticeData1?Category=Notice"
         log.info("Resource loader called");
+
+        String value = redisTemplate.opsForValue().get("NOTICE_LAST_LOAD_DATE");
+        LocalDate lastLoadedDate = value != null ? LocalDate.parse(value) : LocalDate.MIN;
+
         try {
             Notice[] notices = restTemplate.getForObject(
                     url,
@@ -45,7 +54,7 @@ public class NoticeResourceLoader {
                     notice.setType(ResourceType.NOTICE);
                 }
             }
-            lastLoadedDate = LocalDate.now();
+            redisTemplate.opsForValue().set("NOTICE_LAST_LOAD_DATE", LocalDate.now().toString());
             return noticeList;
         } catch (Exception e) {
             log.error("Resource loading error: {}", e.getMessage());

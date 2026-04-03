@@ -1,24 +1,26 @@
 spring:
   application:
-    name: college-help-desk\
+    name: college-help-desk
+
   threads:
     virtual:
-      enabled: true # For better scalability of one thread per request model
+      enabled: true
+
   ai:
-    openai:
-      api-key: ${OPENAI_API_KEY}
+    ollama:
+      base-url: http://localhost:11434
+
       chat:
         options:
-          model: gpt-4.1-mini
+          model: qwen:4b
+
+      embedding:
+        options:
+          model: nomic-embed-text
+
     retry:
       max-attempts: 10
 
-  #    ollama:
-#      base-url: http://localhost:11434
-#      chat:
-#        model: deepseek-r1:1.5b
-#      embedding:
-#        model: nomic-embed-text # dimension depends on model to model
   autoconfigure:
     exclude:
       - org.springframework.ai.vectorstore.elasticsearch.autoconfigure.ElasticsearchVectorStoreAutoConfiguration
@@ -28,21 +30,18 @@ elasticsearch:
   port: 9200
 
 embedding:
-  dimensions: 768 # supported by nomic-embed-text, adjust if using a different model for VectorStore
+  dimensions: 768
 
-# check ConversationMemoryService
 conversation:
   memory:
     max-size: 10
 
-# check QueryCacheService
 vector-cache:
-  similarity_threshold: 0.95 # check query similarity to query in vector cache
+  similarity_threshold: 0.95
 
-# check VectorSearchService
 vector-database:
   top-k: 2
-  similarity-threshold: 0.6 # check query similarity to content in vector database
+  similarity-threshold: 0.6
 
 redis:
   host: localhost
@@ -50,7 +49,3 @@ redis:
 
 chat-history:
   max-messages: 5
-
-
-
-
