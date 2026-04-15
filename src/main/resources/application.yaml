@@ -5,18 +5,23 @@ spring:
   threads:
     virtual:
       enabled: true
-
+# Note: if embedding model changes, need to reingest the old data as each embedding model will produce different vectors of their own
   ai:
-    ollama:
-      base-url: http://localhost:11434
+    model:
+      chat: google-genai
+      embedding: none
+    google:
+      genai:
+        api-key: ${GOOGLE_API_KEY}
+        chat:
+          options:
+            model: gemini-3.1-flash-lite-preview
 
-      chat:
-        options:
-          model: qwen:4b
-
-      embedding:
-        options:
-          model: nomic-embed-text
+#    ollama:
+#      base-url: http://localhost:11434
+#      embedding:
+#        options:
+#          model: nomic-embed-text
 
     retry:
       max-attempts: 10
@@ -32,10 +37,6 @@ elasticsearch:
 embedding:
   dimensions: 768
 
-conversation:
-  memory:
-    max-size: 10
-
 vector-cache:
   similarity_threshold: 0.95
 
@@ -44,8 +45,8 @@ vector-database:
   similarity-threshold: 0.6
 
 redis:
-  host: localhost
+  host: ${REDIS_HOST:localhost}
   port: 6379
 
 chat-history:
-  max-messages: 5
+  max-messages: 2

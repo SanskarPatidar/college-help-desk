@@ -5,7 +5,6 @@ Classify the question into one or more categories.
 Available categories:
 faculty
 notice
-syllabus
 
 Rules:
 - Return ONLY category names.
@@ -23,10 +22,7 @@ Output: faculty
 Question: tell me weather today
 Output:
 
-Question: syllabus of dbms and notice for upcoming events
-Output: syllabus, notice
+Question: qualification of this professor and notice for upcoming events
+Output: faculty, notice
 
 Now classify:
-
-Question: {question}
-Output:

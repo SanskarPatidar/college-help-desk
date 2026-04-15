@@ -1,21 +1,21 @@
 services:
   # Ollama service: will provide api access to both LLM and embedding model
-  ollama:
-    image: ollama/ollama:0.13.0
-    ports:
-      - 11434:11434
-    container_name: ollama
-    pull_policy: always
-    tty: true
-    restart: always
-    volumes:
-      - ./install-ollama-models.sh:/install-ollama-models.sh
-    entrypoint: ["/usr/bin/bash", "/install-ollama-models.sh"]
-    environment:
-      - OLLAMA_KEEP_ALIVE=24h
-      - OLLAMA_HOST=0.0.0.0
-    networks:
-      - ollama-docker
+  #  ollama:
+  #    image: ollama/ollama:0.13.0
+  #    ports:
+  #      - 11434:11434
+  #    container_name: ollama
+  #    pull_policy: always
+  #    tty: true
+  #    restart: always
+  #    volumes:
+  #      - ./install-ollama-models.sh:/install-ollama-models.sh
+  #    entrypoint: ["/usr/bin/bash", "/install-ollama-models.sh"]
+  #    environment:
+  #      - OLLAMA_KEEP_ALIVE=24h
+  #      - OLLAMA_HOST=0.0.0.0
+  #    networks:
+  #      - ollama-docker
 
   # Elasticsearch service: will provide vector database functionality
   elasticsearch:
@@ -23,11 +23,11 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:9.1.7
     ports:
       - 9200:9200
-      - 9300:9300
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - xpack.security.enrollment.enabled=false
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
 
       # config otherwise elasticvue browser access will complain
       - http.cors.enabled=true
@@ -48,10 +48,7 @@ services:
     container_name: redis-stack
     image: redis/redis-stack:latest
     ports:
-      - "6379:6379" # Redis
-      - "8001:8001" # RedisInsight UI
-    volumes:
-      - redis_stack_data:/data
+      - 6379:6379
 
   college-help-desk:
     build:
@@ -62,22 +59,11 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      ollama:
-        condition: service_started
       elasticsearch:
         condition: service_started
-      elasticvue:
+      redis-stack:
         condition: service_started
-    networks:
-      - ollama-docker
     environment:
-      - DOCKER_OLLAMA_HOST=${DOCKER_OLLAMA_HOST}
-      - DOCKER_ELASTICSEARCH_HOST=${DOCKER_ELASTICSEARCH_HOST}
-
-
-networks:
-  ollama-docker:
-    external: false
-
-volumes:
-  redis_stack_data:
+      - ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST}
+      - REDIS_HOST=${REDIS_HOST}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}

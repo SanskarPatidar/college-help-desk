@@ -12,10 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -37,6 +34,7 @@ public class NoticeResourceLoader {
                     url,
                     Notice[].class
             );
+            Arrays.stream(notices).forEach(notice -> System.out.println(notice));
             log.info("Api called");
             if(notices == null) throw new Exception("Received initial null response from notices Api");
             List<Resource> noticeList = new ArrayList<>();
@@ -44,6 +42,7 @@ public class NoticeResourceLoader {
                 String[] data = notice.getNoticeData().split(";");
                 String dateString = notice.getPublishedDate().substring(0, 10);
                 if(LocalDate.parse(dateString).isBefore(lastLoadedDate))continue; // filter already loaded notices
+
                 if(data.length % 4 != 0) throw new Exception("Invalid data received from notices API");
                 for(int i = 0; i < data.length; i+=4){
                     notice.setId(UUID.randomUUID().toString());
@@ -54,7 +53,7 @@ public class NoticeResourceLoader {
                     notice.setType(ResourceType.NOTICE);
                 }
             }
-            redisTemplate.opsForValue().set("NOTICE_LAST_LOAD_DATE", LocalDate.now().toString());
+            redisTemplate.opsForValue().set("NOTICE_LAST_LOAD_DATE", LocalDate.now().toString()); // no TTL
             return noticeList;
         } catch (Exception e) {
             log.error("Resource loading error: {}", e.getMessage());

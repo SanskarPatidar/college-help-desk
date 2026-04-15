@@ -3,7 +3,6 @@ WORKDIR /app
 COPY .mvn ./.mvn
 COPY mvnw pom.xml ./
 COPY src ./src
-COPY install-ollama-models.sh ./
 # Skips tests to make the build faster
 RUN ./mvnw clean package -DskipTests
 

@@ -8,7 +8,7 @@ Do NOT change names.
 Return only the rewritten question.
 No explanation.
 No extra words.
-{history}
+
 Query:
 {query}
 

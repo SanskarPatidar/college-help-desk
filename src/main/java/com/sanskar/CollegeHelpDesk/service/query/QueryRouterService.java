@@ -1,8 +1,10 @@
 package com.sanskar.CollegeHelpDesk.service.query;
 
+import com.sanskar.CollegeHelpDesk.model.ModelName;
 import com.sanskar.CollegeHelpDesk.model.ResourceType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,7 +28,7 @@ public class QueryRouterService {
     @Value("classpath:/prompts/query_classifier_system_prompt.st")
     private Resource systemPromptResource;
 
-    public Set<ResourceType> detectTabs(String query){
+    public Set<ResourceType> detectTabs(String transformedQuery, String modelName){
         log.info("QueryRouterService called");
         // end quote treated as base indentation level
         // if text on left of end quote → no extra indentation
@@ -34,11 +36,16 @@ public class QueryRouterService {
         PromptTemplate promptTemplate = PromptTemplate.builder()
                 .resource(systemPromptResource)
                 .build();
-        String prompt = promptTemplate.render(Map.of("question", query));
+        String prompt = promptTemplate.render(Map.of());
         Instant start = Instant.now();
+
         String rawResponse = chatClient
                 .prompt()
+                .options(ChatOptions.builder()
+                        .model(modelName)
+                        .build())
                 .system(prompt)
+                .user(transformedQuery)
                 .call()
                 .content();
         Instant end = Instant.now();

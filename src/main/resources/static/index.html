@@ -1,133 +1,277 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>College AI Assistant</title>
-
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>IIIT Bhopal Help Desk</title>
     <style>
-        body{
-            font-family: Arial;
-            background:#0f172a;
-            color:white;
-            display:flex;
-            justify-content:center;
-            margin-top:40px;
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{
+            --navy:#0b3d91;--navy-dark:#082d6e;--navy-light:#1a52a8;
+            --accent:#c8a951;--bg:#f0f2f5;--surface:#ffffff;--border:#d0d7e3;
+            --text:#1a1a2e;--muted:#6b7280;--user-bubble:#0b3d91;
+            --error:#c0392b;--error-bg:#fdecea;--success:#1a7a4a;
+            --radius:16px;--font:'Segoe UI',system-ui,sans-serif;
         }
-
-        .box{
-            width:750px;
-        }
-
-        textarea{
-            width:100%;
-            height:90px;
-            padding:10px;
-            font-size:16px;
-            border-radius:8px;
-            border:none;
-        }
-
-        button{
-            margin-top:12px;
-            padding:10px 20px;
-            font-size:16px;
-            border:none;
-            border-radius:8px;
-            background:#22c55e;
-            color:white;
+        html,body{height:100%;width:100%;margin:0;padding:0;}
+        .app{font-family:var(--font);background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh;width:100%;overflow:hidden;}
+        header{background:var(--navy);color:#fff;padding:0 1rem;height:54px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;}
+        .hdr-left{display:flex;align-items:center;gap:8px;}
+        .logo{width:30px;height:30px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--navy-dark);flex-shrink:0;}
+        .hdr-title{font-size:.9rem;font-weight:600;}
+        .hdr-right{display:flex;align-items:center;gap:8px;}
+        .hdr-select{
+            background:rgba(255,255,255,.12);
+            color:#fff;
+            border:1px solid rgba(255,255,255,.3);
+            border-radius:5px;
+            padding:4px 8px;
+            font-size:.72rem;
+            font-family:var(--font);
             cursor:pointer;
+            outline:none;
         }
+        .hdr-select option{
+            background:#1a1a2e;
+            color:#ffffff;
+        }        .hdr-btn{background:var(--accent);color:var(--navy-dark);border:none;border-radius:5px;padding:5px 12px;font-size:.75rem;font-weight:700;font-family:var(--font);cursor:pointer;}
+        .layout{display:flex;flex:1;min-height:0;overflow:hidden;}
 
-        .response{
-            margin-top:20px;
-            padding:15px;
-            background:#1e293b;
-            border-radius:8px;
-            min-height:120px;
-            white-space:pre-wrap;
-        }
+        .side{width:220px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:.85rem;gap:8px;overflow-y:auto;}
+        .side h2{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--navy);padding-bottom:7px;border-bottom:2px solid var(--navy);}
+        .instr-body{flex:1;display:flex;flex-direction:column;gap:7px;min-height:0;}
+        .instr-hint{font-size:.68rem;color:var(--muted);line-height:1.5;padding:7px 9px;background:#eef1f8;border-radius:0;border-left:3px solid var(--navy);white-space:pre-line;}        #instr-ta{flex:1;width:100%;min-height:160px;resize:none;border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:.75rem;font-family:var(--font);line-height:1.55;color:var(--text);background:#f7f9fc;outline:none;}
+        #instr-ta:focus{border-color:var(--navy);background:#fff;}
+        #instr-ta::placeholder{color:#aab0be;}
+        .save-row{display:flex;align-items:center;gap:7px;}
+        #save-btn{background:var(--navy);color:#fff;border:none;border-radius:5px;padding:5px 13px;font-size:.72rem;font-weight:600;font-family:var(--font);cursor:pointer;}
+        #save-btn:hover{background:var(--navy-light);}
+        #saved-msg{font-size:.68rem;color:var(--success);font-weight:600;opacity:0;transition:opacity .3s;}
+        #saved-msg.show{opacity:1;}
+        #instr-preview{display:none;background:#f7f9fc;border:1px solid var(--border);border-radius:7px;padding:9px 11px;font-size:.75rem;line-height:1.6;color:var(--text);white-space:pre-wrap;word-break:break-word;}
 
-        .session{
-            margin-bottom:10px;
-            background:#1e293b;
-            padding:12px;
-            border-radius:8px;
-            font-size:14px;
-        }
-
-        .note{
-            font-size:13px;
-            color:#cbd5e1;
-            margin-top:6px;
-        }
+        .chat-wrap{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg);}
+        #chat-log{flex:1;overflow-y:auto;padding:1rem .85rem;display:flex;flex-direction:column;gap:12px;}
+        .welcome{text-align:center;padding:1.5rem .5rem;color:var(--muted);}
+        .w-icon{width:48px;height:48px;background:var(--navy);border-radius:12px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;}
+        .w-icon svg{fill:var(--accent);}
+        .welcome h3{font-size:.9rem;color:var(--navy);font-weight:600;margin-bottom:5px;}
+        .welcome p{font-size:.78rem;line-height:1.55;max-width:280px;margin:0 auto;}
+        .msg-row{display:flex;flex-direction:column;max-width:74%;gap:3px;}
+        .msg-row.user{align-self:flex-end;align-items:flex-end;}
+        .msg-row.bot{align-self:flex-start;align-items:flex-start;}
+        .bubble{padding:8px 12px;border-radius:var(--radius);font-size:.82rem;line-height:1.6;word-break:break-word;}
+        .user .bubble{background:var(--user-bubble);color:#fff;border-bottom-right-radius:4px;}
+        .bot .bubble{background:#fff;color:var(--text);border:1px solid var(--border);border-bottom-left-radius:4px;}
+        .meta{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+        .ts{font-size:.65rem;color:var(--muted);}
+        .b-cached{font-size:.62rem;font-weight:600;background:#e8f5e9;color:#1a7a4a;padding:1px 6px;border-radius:20px;border:1px solid #a8d5b5;}
+        .b-lat{font-size:.62rem;color:var(--muted);background:#eef0f4;padding:1px 6px;border-radius:20px;}
+        .loading-bubble{background:#fff;border:1px solid var(--border);border-radius:var(--radius);border-bottom-left-radius:4px;padding:10px 16px;display:flex;gap:5px;align-items:center;}
+        .dot{width:6px;height:6px;border-radius:50%;background:var(--navy);opacity:.3;animation:pulse 1.2s infinite;}
+        .dot:nth-child(2){animation-delay:.2s;}.dot:nth-child(3){animation-delay:.4s;}
+        @keyframes pulse{0%,100%{opacity:.2;transform:scale(.85);}50%{opacity:.9;transform:scale(1);}}
+        .input-bar{flex-shrink:0;padding:8px .85rem 10px;background:var(--surface);border-top:1px solid var(--border);display:flex;gap:8px;align-items:flex-end;}
+        #user-input{flex:1;border:1px solid var(--border);border-radius:9px;padding:8px 12px;font-family:var(--font);font-size:.82rem;resize:none;outline:none;line-height:1.5;min-height:38px;max-height:100px;overflow-y:auto;color:var(--text);background:var(--bg);}
+        #user-input:focus{border-color:var(--navy);}
+        #user-input::placeholder{color:var(--muted);}
+        #send-btn{width:38px;height:38px;border-radius:9px;background:var(--navy);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        #send-btn:hover{background:var(--navy-light);}
+        #send-btn svg{fill:#fff;}
+        #chat-log::-webkit-scrollbar{width:4px;}
+        #chat-log::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+        .error-bubble{background:var(--error-bg);border:1px solid #f5c6c6;border-radius:var(--radius);border-bottom-left-radius:4px;padding:8px 12px;font-size:.82rem;line-height:1.6;color:var(--error);word-break:break-word;}
+        .b-tokens{font-size:.62rem;color:var(--muted);background:#eef0f4;padding:1px 6px;border-radius:20px;}
     </style>
 </head>
-
 <body>
-<div class="box">
 
-    <h2>College AI Assistant</h2>
+<div class="app">
+    <header>
+        <div class="hdr-left">
+            <div class="logo">IB</div>
+            <span class="hdr-title">IIIT Bhopal Help Desk</span>
+        </div>
+        <div class="hdr-right">
+            <select class="hdr-select" id="model-select">
+                <option value="GEMINI_2_5_FLASH">Gemini 2.5 Flash</option>
+                <option value="GEMINI_2_5_FLASH_LITE">Gemini 2.5 Flash Lite</option>
+                <option value="GEMINI_FLASH_LATEST">Gemini Flash Latest</option>
+                <option value="GEMINI_FLASH_LITE_LATEST">Gemini Flash Lite Latest</option>
+                <option value="GEMINI_3_FLASH_PREVIEW">Gemini 3 Flash Preview</option>
+                <option value="GEMINI_3_1_FLASH_LITE_PREVIEW">Gemini 3.1 Flash Lite Preview</option>
+            </select>
+            <button class="hdr-btn" onclick="newChat()">+ New Chat</button>
+        </div>
+    </header>
 
-    <div class="session">
-        <b>Your Session ID:</b>
-        <span id="sessionId"></span>
-        <button onclick="newSession()" style="margin-left:10px;background:#ef4444;">New Session</button>
+    <div class="layout">
+        <aside class="side">
+            <h2>Instructions</h2>
+            <div class="instr-body">
+                <div class="instr-hint">- Please forgive me for the simplicity of this web page as I am not a front-end developer, but I hope the functionality will be helpful.
+                    - If you face server error, try switching to a different model for same query.
+                    - At max 20-30 seconds latency is expected for the first time query. Subsequent similar queries should be much faster as the answers are cached.
+                    - This help desk can only provide information available to IIIT Bhopal official site.
+                    - If information is not available on official site, it won't be able to answer.
+                    - Currently, it is only capable to answer queries related to "Notice" and "Faculty". I am planning to expand its knowledge base in future.
+                </div>
+                <textarea id="instr-ta" placeholder="Type your notes here…"></textarea>
+                <div class="save-row">
+                    <button id="save-btn" onclick="saveInstr()">Save</button>
+                    <span id="saved-msg">Saved!</span>
+                </div>
+                <div id="instr-preview"></div>
+            </div>
+        </aside>
 
-        <div class="note">
-            If you want conversation memory to be saved,<br>
-            copy and reuse this session ID later.<br>
-            If you refresh or create new session, memory resets.
+        <div class="chat-wrap">
+            <div id="chat-log">
+                <div class="welcome" id="welcome">
+                    <div class="w-icon"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></div>
+                    <h3>Welcome to IIIT Bhopal Help Desk</h3>
+                    <p>Ask any question about admissions, academics, hostel, fees, or campus life.</p>
+                </div>
+            </div>
+            <div class="input-bar">
+                <textarea id="user-input" rows="1" placeholder="Type your question here…"></textarea>
+                <button id="send-btn" onclick="sendMsg()">
+                    <svg width="16" height="16" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
+            </div>
         </div>
     </div>
-
-    <textarea id="query" placeholder="Ask about faculty, notices, syllabus..."></textarea>
-    <br>
-    <button onclick="ask()">Ask</button>
-
-    <div class="response" id="response">Answer will appear here...</div>
-
 </div>
 
 <script>
+    const log = document.getElementById('chat-log');
+    const inp = document.getElementById('user-input');
+    const modelSelect = document.getElementById('model-select');
 
-    let sessionId = localStorage.getItem("sessionId");
+    const API_BASE = 'http://localhost:8080';
+    let conversationId = crypto.randomUUID();
 
-    if(!sessionId){
-        sessionId = crypto.randomUUID();
-        localStorage.setItem("sessionId", sessionId);
-    }
+    function ts(){ return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
+    function scrollEnd(){ log.scrollTop = log.scrollHeight; }
 
-    document.getElementById("sessionId").innerText = sessionId;
-
-    function newSession(){
-        sessionId = crypto.randomUUID();
-        localStorage.setItem("sessionId", sessionId);
-        document.getElementById("sessionId").innerText = sessionId;
-    }
-
-    async function ask(){
-
-        let query = document.getElementById("query").value.trim();
-        if(!query) return;
-
-        document.getElementById("response").innerText = "Thinking...";
-
-        try{
-            let res = await fetch("/ask/" + sessionId, {
-                method:"POST",
-                headers:{
-                    "Content-Type":"text/plain"
-                },
-                body: query
-            });
-
-            let data = await res.text();
-            document.getElementById("response").innerText = data;
-
-        }catch(e){
-            document.getElementById("response").innerText = "Server error";
+    function saveInstr(){
+        const ta = document.getElementById('instr-ta');
+        const preview = document.getElementById('instr-preview');
+        const btn = document.getElementById('save-btn');
+        const msg = document.getElementById('saved-msg');
+        const isEdit = ta.style.display !== 'none';
+        if(isEdit){
+            const txt = ta.value.trim();
+            if(txt){
+                preview.textContent = ta.value;
+                preview.style.display = 'block';
+                ta.style.display = 'none';
+                btn.textContent = 'Edit';
+                msg.classList.add('show');
+                setTimeout(()=>msg.classList.remove('show'), 2000);
+            }
+        } else {
+            preview.style.display = 'none';
+            ta.style.display = 'block';
+            btn.textContent = 'Save';
+            ta.focus();
         }
     }
 
+    function addBubble(text, role, extra){
+        const w = document.getElementById('welcome');
+        if(w) w.remove();
+        const row = document.createElement('div');
+        row.className = 'msg-row ' + role;
+        let meta = `<span class="ts">${ts()}</span>`;
+        if(extra && extra.cached)   meta += `<span class="b-cached">Cached</span>`;
+        if(extra && extra.latency)  meta += `<span class="b-lat">${extra.latency} ms</span>`;
+        if(extra && extra.totalTokens != null) meta += `<span class="b-tokens">${extra.totalTokens} tokens</span>`;
+        row.innerHTML = `<div class="bubble">${text.replace(/\n/g,'<br>')}</div><div class="meta">${meta}</div>`;
+        log.appendChild(row);
+        scrollEnd();
+        return row;
+    }
+
+    function addErrorBubble(message){
+        const w = document.getElementById('welcome');
+        if(w) w.remove();
+        const row = document.createElement('div');
+        row.className = 'msg-row bot';
+        row.innerHTML = `<div class="error-bubble">⚠ ${message}</div><div class="meta"><span class="ts">${ts()}</span></div>`;
+        log.appendChild(row);
+        scrollEnd();
+    }
+
+    function addLoading(){
+        const row = document.createElement('div');
+        row.className = 'msg-row bot'; row.id = 'loading';
+        row.innerHTML = `<div class="loading-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+        log.appendChild(row); scrollEnd();
+    }
+
+    function setSendState(disabled){
+        document.getElementById('send-btn').disabled = disabled;
+        inp.disabled = disabled;
+    }
+
+    async function sendMsg(){
+        const msg = inp.value.trim();
+        if(!msg) return;
+        inp.value = ''; inp.style.height = 'auto';
+        addBubble(msg, 'user');
+        addLoading();
+        setSendState(true);
+
+        const modelName = modelSelect.value;
+
+        try {
+            const res = await fetch(`${API_BASE}/ask/${encodeURIComponent(conversationId)}/${encodeURIComponent(modelName)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: msg
+            });
+
+            const loadingEl = document.getElementById('loading');
+            if(loadingEl) loadingEl.remove();
+
+            if(!res.ok){
+                let errMsg = `Server error: ${res.status} ${res.statusText}`;
+                try {
+                    const errBody = await res.text();
+                    if(errBody) errMsg += ` — ${errBody}`;
+                } catch(_){}
+                addErrorBubble(errMsg);
+                return;
+            }
+
+            const data = await res.json();
+            addBubble(data.answer, 'bot', {
+                latency:     data.latency,
+                cached:      data.cached,
+                totalTokens: data.totalTokens
+            });
+
+        } catch(err) {
+            const loadingEl = document.getElementById('loading');
+            if(loadingEl) loadingEl.remove();
+
+            if(err instanceof TypeError && err.message.toLowerCase().includes('fetch')){
+                addErrorBubble('Could not reach the server. Please check that the backend is running on port 8080.');
+            } else {
+                addErrorBubble(`Unexpected error: ${err.message}`);
+            }
+        } finally {
+            setSendState(false);
+            inp.focus();
+        }
+    }
+
+    function newChat(){
+        conversationId = crypto.randomUUID();
+        log.innerHTML = `<div class="welcome" id="welcome"><div class="w-icon"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></div><h3>Welcome to IIIT Bhopal Help Desk</h3><p>Ask any question about admissions, academics, hostel, fees, or campus life.</p></div>`;
+        inp.value='';
+    }
+
+    inp.addEventListener('input',()=>{inp.style.height='auto';inp.style.height=Math.min(inp.scrollHeight,100)+'px';});
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
 </script>
 </body>
 </html>

@@ -8,8 +8,10 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -23,6 +25,8 @@ public class QueryCacheRepository {
     @Autowired
     @Qualifier("cache-index")
     private VectorStore vectorStore;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
     public QueryResponse searchSimilar(String query, String conversationId) {
         long start = System.currentTimeMillis();
@@ -38,24 +42,28 @@ public class QueryCacheRepository {
         }
         Document mostSimilar = similarResults.getFirst();
         log.info("Found similar query in cache with similarity score: {}", mostSimilar.getScore());
+        String answer = redisTemplate.opsForValue().get(mostSimilar.getId());
+        if (answer == null) {
+            log.info("Cache expired for id: {}, deleting from vector store", mostSimilar.getId());
+            vectorStore.delete(List.of(mostSimilar.getId()));
+            return null;
+        }
         return QueryResponse.builder()
                 .conversationId(conversationId)
                 .query(query)
-                .answer((String)mostSimilar.getMetadata().get("answer"))
+                .answer(answer)
                 .totalTokens(0)
                 .latency(System.currentTimeMillis() - start)
                 .cached(true)
                 .build();
-
     }
 
     public void store(String query, String answer) {
         Document doc = Document.builder()
                 .id(UUID.randomUUID().toString())
-                .text(query) // update content field name in vector store configuration
-                .metadata(Map.of("answer", answer)) // storing the answer in metadata for retrieval during search
+                .text(query) // based on what should we do the similarity search
                 .build();
+        redisTemplate.opsForValue().set(doc.getId(), answer, Duration.ofHours(6)); // TTL = 6 hrs
         vectorStore.add(List.of(doc));
     }
-
 }

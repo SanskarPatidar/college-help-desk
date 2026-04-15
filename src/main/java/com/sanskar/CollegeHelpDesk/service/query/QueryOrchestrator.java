@@ -1,6 +1,9 @@
 package com.sanskar.CollegeHelpDesk.service.query;
 
+import com.sanskar.CollegeHelpDesk.config.DynamicCompressionTransformer;
+import com.sanskar.CollegeHelpDesk.config.DynamicTranslationTransformer;
 import com.sanskar.CollegeHelpDesk.model.ChatMessage;
+import com.sanskar.CollegeHelpDesk.model.ModelName;
 import com.sanskar.CollegeHelpDesk.model.QueryResponse;
 import com.sanskar.CollegeHelpDesk.model.ResourceType;
 import com.sanskar.CollegeHelpDesk.service.cache.QueryCacheRepository;
@@ -8,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.rag.Query;
@@ -31,7 +35,7 @@ public class QueryOrchestrator {
     @Autowired
     private VectorSearchService vectorSearchService;
     @Autowired
-    private UserMessageBuilderService userMessageBuilderService;
+    private SystemMessageBuilderService systemMessageBuilderService;
     @Autowired
     private QueryRouterService queryRouterService;
     @Autowired
@@ -44,17 +48,17 @@ public class QueryOrchestrator {
     @Qualifier("finalQueryChatClient")
     private ChatClient chatClient;
     @Autowired
-    private CompressionQueryTransformer compressionTransformer;
+    private DynamicCompressionTransformer dynamicCompressionTransformer;
     @Autowired
-    private TranslationQueryTransformer translationTransformer;
-    @Value("classpath:/prompts/final_query_system_prompt.st")
-    private Resource finalQueryPrompt;
+    private DynamicTranslationTransformer dynamicTranslationTransformer;
 
-    public QueryResponse ask(String query, String conversationId) {
-        String transformedQuery = compressionTransformer.transform(
-                translationTransformer.transform(new Query(query))
-        ).text();
-        System.out.println(transformedQuery);
+    public QueryResponse ask(String query, String conversationId, String modelName) {
+        // also need to add model name logic for these hidden chat client usage, ex in code just below
+        String transformedQuery = dynamicCompressionTransformer.transform(
+                dynamicTranslationTransformer.transform(query, modelName), modelName
+        );
+
+        if(transformedQuery.isEmpty())return null;
 
         // using virtual threads for high concurrency with blocking calls
         Future<QueryResponse> cacheFuture = executor.submit(() -> {
@@ -65,34 +69,30 @@ public class QueryOrchestrator {
             long start = System.currentTimeMillis();
             try {
                 // detect tabs
-                Set<ResourceType> tabs = queryRouterService.detectTabs(transformedQuery);
+                Set<ResourceType> tabs = queryRouterService.detectTabs(transformedQuery, modelName);
 
                 // searching in all relevant tabs
                 List<Document> allSegments = new ArrayList<>();
-                for(ResourceType type : tabs){
+                for(ResourceType type : tabs) {
                     allSegments.addAll(
                             vectorSearchService.search(query, type)
                     );
                 }
                 if(allSegments.isEmpty()){
                     log.warn("No context segments found from vector search for query");
-                    return QueryResponse.builder()
-                            .conversationId(conversationId)
-                            .query(transformedQuery)
-                            .answer("No relevant information found.")
-                            .build();
+                    return defaultResponse(conversationId, transformedQuery);
                 }
 
-                String userMessage = userMessageBuilderService.buildUserMessage(allSegments, transformedQuery, conversationId);
+                PromptTemplate systemPromptTemplate = systemMessageBuilderService.buildSystemMessage(allSegments, conversationId);
 
-                PromptTemplate promptTemplate = PromptTemplate.builder()
-                        .resource(finalQueryPrompt)
-                        .build();
                 // calling llm for final answer generation
                 ChatResponse response = chatClient
                         .prompt()
-                        .system(promptTemplate.render())
-                        .user(userMessage)
+                        .options(ChatOptions.builder()
+                                .model(modelName)
+                                .build())
+                        .system(systemPromptTemplate.render())
+                        .user(transformedQuery)
                         .call()
                         .chatClientResponse()
                         .chatResponse();
@@ -110,11 +110,7 @@ public class QueryOrchestrator {
             catch(Exception e){
                 log.error(e.getMessage());
                 log.info("Llm future interrupted");
-                return QueryResponse.builder()
-                        .conversationId(conversationId)
-                        .query(transformedQuery)
-                        .answer("No relevant information found.")
-                        .build();
+                return defaultResponse(conversationId, transformedQuery);
             }
         });
 
@@ -126,19 +122,27 @@ public class QueryOrchestrator {
                 return cached;
             }
             QueryResponse queryResponse = llmFuture.get();
-            executor.execute(() ->
-                    queryCacheRepository.store(transformedQuery, queryResponse.answer())
-            );
-            chatMemory.add(conversationId, ChatMessage.queryResponseToMessage(queryResponse));
+            if(!queryResponse.answer().equals("No information was found in the database for the given query.")) {
+                executor.execute(() ->
+                        queryCacheRepository.store(transformedQuery, queryResponse.answer())
+                );
+                executor.execute(() -> {
+                    chatMemory.add(conversationId, ChatMessage.queryResponseToMessage(queryResponse));
+                });
+            }
             return queryResponse;
         }
         catch (Exception e) {
             log.error("Error in ask()", e);
         }
+        return defaultResponse(conversationId, transformedQuery);
+    }
+
+    private QueryResponse defaultResponse(String conversationId, String query){
         return QueryResponse.builder()
                 .conversationId(conversationId)
-                .query(transformedQuery)
-                .answer("No relevant information found.")
+                .query(query)
+                .answer("No information was found in the database for the given query.")
                 .build();
     }
 }

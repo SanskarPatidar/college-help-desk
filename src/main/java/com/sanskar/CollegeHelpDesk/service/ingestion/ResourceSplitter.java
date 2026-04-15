@@ -20,7 +20,8 @@ public class ResourceSplitter {
             50,   // Minimum characters required to keep a chunk
             50,  // Minimum characters required to keep a chunk
             100, // Maximum chunks generated per document
-            true  // Separator to use when splitting text
+            true,  // Separator to use when splitting text
+            List.of('.', '?', '!', '\n') // The splitter uses this list to find the best place to split within the text, trying to avoid splitting in the middle of a sentence.
     ); // overlap is internally managed
 
     public List<Document> split(List<Resource> resources,
