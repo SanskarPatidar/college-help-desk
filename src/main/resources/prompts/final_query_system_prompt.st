@@ -17,3 +17,5 @@ AVAILABLE INFORMATION:
 ---------------------
 CHAT HISTORY:
 {chat-history}
+
+QUESTION:

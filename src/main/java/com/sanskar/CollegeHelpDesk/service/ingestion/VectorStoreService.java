@@ -21,10 +21,8 @@ public class VectorStoreService {
     public void storeAll(List<Document> docs) {
         log.info("Vector storage service called");
         System.out.println("Storing " + docs.size() + " chunks in vector store");
-        for (Document doc : docs) {
-            ResourceType type = (ResourceType) doc.getMetadata().get("type");
-            embeddingStores.get(resolveIndex(type)).add(List.of(doc));
-        }
+        ResourceType type = (ResourceType) docs.getFirst().getMetadata().get("type");
+        embeddingStores.get(resolveIndex(type)).add(docs);
     }
     private String resolveIndex(ResourceType type) {
         return switch (type) {
