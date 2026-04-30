@@ -33,7 +33,7 @@ public class SystemMessageBuilderService {
         List<Message> messages = chatMemory.get(conversationId);
         int fromIndex = Math.max(0, messages.size() - MAX_CHAT_HISTORY);
         String chatHistory = messages.subList(fromIndex, messages.size()).stream()
-                .map(msg -> "Question=%s: Answer=%s".formatted(
+                .map(msg -> "Question=%s:\nAnswer=%s".formatted(
                         msg.getMetadata().get("query"),
                         msg.getText()
                 ))

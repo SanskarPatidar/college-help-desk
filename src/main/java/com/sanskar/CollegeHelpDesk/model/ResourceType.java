@@ -2,5 +2,6 @@ package com.sanskar.CollegeHelpDesk.model;
 
 public enum ResourceType {
     NOTICE,
-    FACULTY
+    FACULTY,
+    SCHOLARDOC,
 }

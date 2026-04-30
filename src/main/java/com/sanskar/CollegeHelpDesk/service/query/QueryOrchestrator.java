@@ -72,12 +72,14 @@ public class QueryOrchestrator {
                 Set<ResourceType> tabs = queryRouterService.detectTabs(transformedQuery, modelName);
 
                 // searching in all relevant tabs
+                long searchStart = System.currentTimeMillis();
                 List<Document> allSegments = new ArrayList<>();
                 for(ResourceType type : tabs) {
                     allSegments.addAll(
                             vectorSearchService.search(query, type)
                     );
                 }
+                log.info("Vector search completed in {} ms", System.currentTimeMillis() - searchStart);
                 if(allSegments.isEmpty()){
                     log.warn("No context segments found from vector search for query");
                     return defaultResponse(conversationId, transformedQuery);
@@ -85,6 +87,7 @@ public class QueryOrchestrator {
 
                 PromptTemplate systemPromptTemplate = systemMessageBuilderService.buildSystemMessage(allSegments, conversationId);
 
+                long promptStart = System.currentTimeMillis();
                 // calling llm for final answer generation
                 ChatResponse response = chatClient
                         .prompt()
@@ -96,7 +99,7 @@ public class QueryOrchestrator {
                         .call()
                         .chatClientResponse()
                         .chatResponse();
-
+                log.info("Final response in {} ms", System.currentTimeMillis() - promptStart);
                 return QueryResponse.builder()
                         .conversationId(conversationId)
                         .query(transformedQuery)
@@ -118,7 +121,9 @@ public class QueryOrchestrator {
             QueryResponse cached = cacheFuture.get();
             if (cached != null) {
                 llmFuture.cancel(true);
+                long startChatMemory = System.currentTimeMillis();
                 chatMemory.add(conversationId, ChatMessage.queryResponseToMessage(cached));
+                log.info("Chat memory update completed in {} ms", System.currentTimeMillis() - startChatMemory);
                 return cached;
             }
             QueryResponse queryResponse = llmFuture.get();

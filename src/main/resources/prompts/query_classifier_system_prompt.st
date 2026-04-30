@@ -5,6 +5,7 @@ Classify the question into one or more categories.
 Available categories:
 faculty
 notice
+scholardoc
 
 Rules:
 - Return ONLY category names.
@@ -24,5 +25,8 @@ Output:
 
 Question: qualification of this professor and notice for upcoming events
 Output: faculty, notice
+
+Question: application of scholarship
+Output: scholardoc
 
 Now classify:

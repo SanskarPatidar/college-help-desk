@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Builder
-@Data
+@Data // will generates getters, setters, toString, equals, and hashCode methods
 @AllArgsConstructor
 @NoArgsConstructor
 public class Faculty implements Resource {
@@ -28,15 +28,5 @@ public class Faculty implements Resource {
     @Override
     public String getHeader() {
         return name;
-    }
-
-    @Override
-    public ResourceType getType() {
-        return type;
-    }
-
-    @Override
-    public String getPublishedDate() {
-        return publishedDate;
     }
 }

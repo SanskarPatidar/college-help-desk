@@ -48,6 +48,7 @@ public class QueryCacheRepository {
             vectorStore.delete(List.of(mostSimilar.getId()));
             return null;
         }
+        log.info("Similarity Cache search took: {} ms", System.currentTimeMillis() - start);
         return QueryResponse.builder()
                 .conversationId(conversationId)
                 .query(query)

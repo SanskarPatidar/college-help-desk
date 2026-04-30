@@ -20,6 +20,7 @@ public class FacultyResourceTransformer{
                 Designation: %s
                 Email: %s
                 Phone: %s
+                FacultyId: %s
 
                 Qualification:
                 %s
@@ -40,6 +41,7 @@ public class FacultyResourceTransformer{
                         empty(f.getDesignation()),
                         empty(f.getEmail()),
                         empty(f.getPhone()),
+                        empty(f.getId()),
                         empty(f.getQualification()),
                         empty(f.getExperience()),
                         empty(f.getTeaching()),

@@ -30,6 +30,7 @@ public class QueryRouterService {
 
     public Set<ResourceType> detectTabs(String transformedQuery, String modelName){
         log.info("QueryRouterService called");
+        Instant start = Instant.now();
         // end quote treated as base indentation level
         // if text on left of end quote → no extra indentation
         // if text on right of end quote → means space included
@@ -37,7 +38,7 @@ public class QueryRouterService {
                 .resource(systemPromptResource)
                 .build();
         String prompt = promptTemplate.render(Map.of());
-        Instant start = Instant.now();
+
 
         String rawResponse = chatClient
                 .prompt()
@@ -72,7 +73,8 @@ public class QueryRouterService {
     Set<ResourceType> fallback() {
         return Set.of(
                 ResourceType.FACULTY,
-                ResourceType.NOTICE
+                ResourceType.NOTICE,
+                ResourceType.SCHOLARDOC
         );
     }
 }

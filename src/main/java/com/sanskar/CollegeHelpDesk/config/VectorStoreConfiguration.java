@@ -54,6 +54,20 @@ public class VectorStoreConfiguration {
                 .build();
     }
 
+    @Bean("scholarship-index")
+    public VectorStore scholarshipIndexVectorStore(RestClient restClient,
+                                               EmbeddingModel embeddingModel,
+                                               @Value("${embedding.dimensions}") int dimensions
+    ) {
+        ElasticsearchVectorStoreOptions vectorStoreOptions = new ElasticsearchVectorStoreOptions();
+        vectorStoreOptions.setDimensions(dimensions);
+        vectorStoreOptions.setIndexName("scholarship-index");
+        return ElasticsearchVectorStore.builder(restClient, embeddingModel)
+                .options(vectorStoreOptions)
+                .initializeSchema(true) // create index if not exists
+                .build();
+    }
+
     @Bean
     public JedisPooled jedisPooled(@Value("${redis.host}") String host, @Value("${redis.port}") int port) {
         return new JedisPooled(host, port);

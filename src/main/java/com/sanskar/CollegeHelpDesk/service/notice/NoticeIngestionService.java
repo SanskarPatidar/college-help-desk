@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class NoticeIngestionService extends AbstractIngestionTemplate {
+public class NoticeIngestionService extends AbstractIngestionTemplate<String> { // String url
     private final NoticeResourceLoader noticeResourceLoader;
     private final NoticeResourceTransformer noticeResourceTransformer;
 

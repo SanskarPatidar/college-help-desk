@@ -35,6 +35,7 @@ public class VectorSearchRepository {
         return switch (type) {
             case ResourceType.FACULTY -> "faculty-index";
             case ResourceType.NOTICE -> "notice-index";
+            case ResourceType.SCHOLARDOC ->  "scholarship-index";
         };
     }
 }

@@ -21,6 +21,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ChatClientConfiguration {
 
+    SafeGuardAdvisor safeGuardAdvisor = SafeGuardAdvisor.builder()
+            .sensitiveWords(List.of("Bomb", "Attack", "Kill", "Hate", "Terror"))
+            .build(); // can be used to filter out sensitive content from prompt or response
+    // recursive advisor: when you need to repeatedly call the LLM until a certain condition is met
+
     @Bean(name = "finalQueryChatClient")
     public ChatClient finalQueryChatClient(ChatClient.Builder builder, MetadataLoggerAdvisor metadataLoggerAdvisor) {
         // Final Query chat client configuration
@@ -36,10 +41,7 @@ public class ChatClientConfiguration {
 //        PromptChatMemoryAdvisor promptAdvisor = PromptChatMemoryAdvisor.builder(chatMemory) // requires chat memory to add conversation history to the prompt as system instructions
 //                .systemPromptTemplate(promptTemplate)
 //                .build();
-        SafeGuardAdvisor safeGuardAdvisor = SafeGuardAdvisor.builder()
-                .sensitiveWords(List.of())
-                .build(); // can be used to filter out sensitive content from prompt or response
-        // recursive advisor: when you need to repeatedly call the LLM until a certain condition is met
+
         return builder
                 .defaultOptions(ChatOptions.builder()
                         .temperature(0.3)
@@ -63,8 +65,8 @@ public class ChatClientConfiguration {
 //                                .presencePenalty(0.0)
                                 .build()
                 )
+                .defaultAdvisors(safeGuardAdvisor)
                 .build();
-
     }
 
     // Default embedding model configurations are enough, no need to override for now, can always create new bean if needed with different options

@@ -28,7 +28,7 @@ public class VectorStoreService {
         return switch (type) {
             case ResourceType.FACULTY -> "faculty-index";
             case ResourceType.NOTICE -> "notice-index";
-            default -> "syllabus-index";
+            case ResourceType.SCHOLARDOC ->  "scholarship-index";
         };
     }
 }

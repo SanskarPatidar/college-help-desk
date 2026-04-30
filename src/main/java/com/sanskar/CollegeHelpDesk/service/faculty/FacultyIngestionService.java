@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class FacultyIngestionService extends AbstractIngestionTemplate {
+public class FacultyIngestionService extends AbstractIngestionTemplate<String> { // String url
     private final FacultyResourceLoader facultyResourceLoader;
     private final FacultyResourceTransformer facultyResourceTransformer;
 

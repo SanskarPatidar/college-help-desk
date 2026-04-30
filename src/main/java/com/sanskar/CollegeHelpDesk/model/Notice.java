@@ -29,10 +29,5 @@ public class Notice implements Resource {
         return title;
     }
 
-    @Override
-    public ResourceType getType() {
-        return type;
-    }
-
 }
 

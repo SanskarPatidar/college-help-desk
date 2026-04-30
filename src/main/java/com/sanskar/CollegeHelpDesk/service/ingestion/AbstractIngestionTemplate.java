@@ -11,13 +11,13 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public abstract class AbstractIngestionTemplate {
+public abstract class AbstractIngestionTemplate<T> {
     private final ResourceSplitter resourceSplitter;
     private final VectorStoreService vectorStoreService;
 
-    public final void ingest(String url) {
+    public final void ingest(T input) {
         log.info("Ingestion started");
-        List<Resource> resources = load(url);
+        List<Resource> resources = load(input);
         if(resources == null || resources.isEmpty()){
             log.info("No resources found");
             return;
@@ -28,13 +28,13 @@ public abstract class AbstractIngestionTemplate {
         log.info("Ingestion completed");
     }
 
-    protected abstract List<Resource> load(String url);
+    protected abstract List<Resource> load(T input);
     protected abstract List<String> transform(List<Resource> resources);
     protected List<Document> split(List<Resource> resources, List<String> texts) {
         return resourceSplitter.split(resources, texts);
-    };
+    }
     protected void store(List<Document> docs) {
         vectorStoreService.storeAll(docs);
-    };
+    }
 }
 
