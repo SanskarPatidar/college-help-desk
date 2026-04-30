@@ -32,6 +32,7 @@ The system is built as a **monolithic backend application** while internally lev
 * Currently, can answer queries related to:
   - IIIT Bhopal notices
   - Faculty information
+  - Scholarship documents
 * Chat-based interaction with conversation tracking
 * Periodic ingestion of latest notices (every 6 hours)
 * Manual ingestion of faculty portfolio data
@@ -56,6 +57,7 @@ The system is built as a **monolithic backend application** while internally lev
 
 * **Notices:** Automatically fetched every 6 hours, filter for only those notices which were not processed according to last_processed_date variable
 * **Faculty:** Manually ingested via API
+* **Scholarship** Manually ingested via json body
 
 ## **Storage Strategy**
 
